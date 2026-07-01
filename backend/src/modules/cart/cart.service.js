@@ -20,20 +20,37 @@ async function getCart(userId) {
 }
 
 async function addItem(userId, payload) {
-  const serviceType = payload.serviceType || payload.service_type || 'stationery';
-  const referenceId = payload.referenceId || payload.reference_id || payload.productId || payload.product_id;
+  const serviceType =
+  payload.serviceType ||
+  payload.service_type ||
+  'stationery';
 
+let referenceId;
+
+if (serviceType === 'printout') {
+  referenceId =
+    payload.printJobId ||
+    payload.print_job_id ||
+    payload.referenceId ||
+    payload.reference_id;
+} else {
+  referenceId =
+    payload.referenceId ||
+    payload.reference_id ||
+    payload.productId ||
+    payload.product_id;
+}
   if (!referenceId) {
     throw new AppError('referenceId is required', 400, 'VALIDATION_ERROR');
   }
 
-  if (!['stationery', 'canteen'].includes(serviceType)) {
-    throw new AppError(
-      'Invalid serviceType',
-      400,
-      'VALIDATION_ERROR'
-    );
-  }
+  if (!['stationery', 'canteen', 'printout'].includes(serviceType)) {
+  throw new AppError(
+    'Invalid serviceType',
+    400,
+    'VALIDATION_ERROR'
+  );
+}
 
   const quantity = parsePositiveQuantity(payload.quantity, 'quantity');
 

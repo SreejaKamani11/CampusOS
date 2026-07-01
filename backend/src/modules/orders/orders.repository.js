@@ -142,7 +142,14 @@ async function getCartItemsForOrder(client, cartId) {
        cmi.created_at AS menu_item_created_at,
        cmi.updated_at AS menu_item_updated_at,
        cmi.category_id AS menu_item_category_id,
-       cc.name AS menu_item_category_name
+       cc.name AS menu_item_category_name,
+       pj.id AS print_job_id,
+pj.file_name,
+pj.page_count,
+pj.options AS print_options,
+pj.calculated_price,
+pj.created_at AS print_created_at,
+pj.updated_at AS print_updated_at
      FROM cart_items ci
      LEFT JOIN stationery_products sp
        ON ci.service_type = 'stationery'
@@ -154,6 +161,9 @@ async function getCartItemsForOrder(client, cartId) {
       AND cmi.id = ci.reference_id
      LEFT JOIN canteen_categories cc
        ON cc.id = cmi.category_id
+       LEFT JOIN print_jobs pj
+  ON ci.service_type = 'printout'
+ AND pj.id = ci.reference_id
      WHERE ci.cart_id = $1
      ORDER BY ci.created_at ASC`,
     [cartId]
@@ -200,9 +210,15 @@ async function createOrderFromCart({ userId }) {
     order.service_type = serviceType;
 
     for (const item of cartItems) {
-        const itemName = item.service_type === 'canteen'
-          ? item.menu_item_name
-          : item.product_name;
+       let itemName;
+
+if (item.service_type === 'canteen') {
+  itemName = item.menu_item_name;
+} else if (item.service_type === 'printout') {
+  itemName = item.file_name;
+} else {
+  itemName = item.product_name;
+}
 
       await client.query(
         `INSERT INTO order_items (

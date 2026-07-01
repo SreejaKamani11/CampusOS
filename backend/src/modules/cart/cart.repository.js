@@ -31,6 +31,20 @@ const baseItem = {
     };
   }
 
+  if (row.service_type === 'printout') {
+  return {
+    ...baseItem,
+    print_job: {
+      id: row.print_job_id,
+      file_name: row.file_name,
+      page_count: row.page_count,
+      calculated_price: row.calculated_price,
+      options: row.print_options,
+      created_at: row.print_created_at,
+      updated_at: row.print_updated_at,
+    },
+  };
+}
   return {
     ...baseItem,
     product: {
@@ -129,12 +143,30 @@ async function findProductById(client, serviceType, referenceId) {
        FROM canteen_menu_items cmi
        LEFT JOIN canteen_categories cc
          ON cc.id = cmi.category_id
-       WHERE cmi.id = $1`,
+       WHERE cmi.id = $1
+AND cmi.available = true`,
       [referenceId]
     );
 
     return result.rows[0] || null;
   }
+  if (serviceType === 'printout') {
+  const result = await client.query(
+    `SELECT
+       id,
+       file_name,
+       page_count,
+       options,
+       calculated_price,
+       created_at,
+       updated_at
+     FROM print_jobs
+     WHERE id = $1`,
+    [referenceId]
+  );
+
+  return result.rows[0] || null;
+}
 
   const result = await client.query(
     `SELECT
@@ -152,7 +184,8 @@ async function findProductById(client, serviceType, referenceId) {
      FROM stationery_products sp
      LEFT JOIN stationery_categories sc
        ON sc.id = sp.category_id
-     WHERE sp.id = $1`,
+     WHERE sp.id = $1
+AND sp.active = true`,
     [referenceId]
   );
 
@@ -229,6 +262,13 @@ async function getCartRows(client, userId) {
        cmi.meal_periods AS menu_item_meal_periods,
        cmi.created_at AS menu_item_created_at,
        cmi.updated_at AS menu_item_updated_at,
+       pj.id AS print_job_id,
+pj.file_name,
+pj.page_count,
+pj.options AS print_options,
+pj.calculated_price,
+pj.created_at AS print_created_at,
+pj.updated_at AS print_updated_at,
        COALESCE(sp.category_id, cmi.category_id) AS category_id,
        COALESCE(sc.name, cc.name) AS category_name
      FROM carts c
@@ -244,6 +284,10 @@ async function getCartRows(client, userId) {
       AND cmi.id = ci.reference_id
      LEFT JOIN canteen_categories cc
        ON cc.id = cmi.category_id
+       
+    LEFT JOIN print_jobs pj
+  ON ci.service_type = 'printout'
+ AND pj.id = ci.reference_id
      WHERE c.user_id = $1
      ORDER BY ci.created_at ASC NULLS LAST`,
     [userId]
@@ -288,7 +332,16 @@ async function addItemToCart({ userId, serviceType = 'stationery', referenceId, 
            unit_price
          )
          VALUES ($1, $2, $3, $4, $5, $6)`,
-        [cart.id, serviceType, referenceId, quantity, {}, product.price]
+        [
+  cart.id,
+  serviceType,
+  referenceId,
+  quantity,
+  {},
+  serviceType === 'printout'
+    ? product.calculated_price
+    : product.price,
+]
       );
     }
 
