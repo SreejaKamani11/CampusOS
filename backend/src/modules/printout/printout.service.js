@@ -87,9 +87,17 @@ async function getPrintJobById(userId, id) {
 
   return printJob;
 }
+async function getAllPrintJobs() {
+    return printoutRepository.findAllPrintJobs();
+}
 
+async function updatePrintJobStatus(id, status) {
+    return printoutRepository.updatePrintJobStatus(id, status);
+}
 module.exports = {
   createPrintJob,
   getPrintJobs,
   getPrintJobById,
+  getAllPrintJobs,
+  updatePrintJobStatus
 };

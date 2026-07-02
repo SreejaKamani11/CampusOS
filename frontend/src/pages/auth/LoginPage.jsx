@@ -14,7 +14,12 @@ function LoginPage() {
     try {
       const response = await authLogin(data.email, data.password)
       login(response.data.user, response.data.accessToken)
-      navigate('/dashboard')
+
+if (response.data.user.role === "admin") {
+  navigate("/admin")
+} else {
+  navigate("/dashboard")
+}
       console.log('Login Successful')
     } catch (error) {
       console.error(error.response?.data || error.message)

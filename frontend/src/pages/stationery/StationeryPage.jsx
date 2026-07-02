@@ -1,31 +1,48 @@
 import { useEffect, useState } from 'react'
 import { getProducts } from '../../services/stationery.service'
 import { addToCart } from '../../services/cart.service'
+import { toast } from "react-toastify";
+import Loading from "../../components/Loading";
+import EmptyState from "../../components/EmptyState";
+
 function StationeryPage() {
-  const [products, setProducts] = useState([])
+ const [products, setProducts] = useState([]);
+const [loading, setLoading] = useState(true);
 const handleAddToCart = async (productId) => {
   try {
     const response = await addToCart(productId, 1)
 
     console.log(response)
 
-    alert("Added to Cart")
+    toast.success("Added to Cart")
   } catch (error) {
     console.error(error.response?.data || error.message)
 
-    alert("Failed to add item to cart")
+    toast.error("Failed to add item to cart")
   }
 }
   useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await getProducts()
-      console.log(response)
-      setProducts(response?.data ?? response ?? [])
+  const fetchProducts = async () => {
+    try {
+      const response = await getProducts();
+      setProducts(response?.data ?? response ?? []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    fetchProducts()
-  }, [])
+  fetchProducts();
+}, []);
+if (loading) {
+  return <Loading />;
+}
 
+if (products.length === 0) {
+  return <EmptyState title="No Products Found" />;
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-100 px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">

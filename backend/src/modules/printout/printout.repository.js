@@ -68,9 +68,48 @@ async function findPrintJobById(userId, id) {
 
   return result.rows[0] || null;
 }
+async function findAllPrintJobs() {
+  const result = await query(
+    `SELECT
+        pj.id,
+        pj.user_id,
+        u.name AS user_name,
+        u.email,
+        pj.file_name,
+        pj.file_path,
+        pj.page_count,
+        pj.options,
+        pj.calculated_price,
+        pj.status,
+        pj.created_at,
+        pj.updated_at
+     FROM print_jobs pj
+     INNER JOIN users u
+        ON u.id = pj.user_id
+     ORDER BY pj.created_at DESC`
+  );
 
+  return result.rows;
+}
+
+async function updatePrintJobStatus(id, status) {
+  const result = await query(
+    `UPDATE print_jobs
+     SET
+        status = $2,
+        updated_at = NOW()
+     WHERE id = $1
+     RETURNING *`,
+    [id, status]
+  );
+
+  return result.rows[0];
+}
 module.exports = {
   createPrintJob,
   findPrintJobsByUserId,
   findPrintJobById,
+  findAllPrintJobs,
+  updatePrintJobStatus,
+  
 };

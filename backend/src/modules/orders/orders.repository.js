@@ -331,9 +331,144 @@ async function findOrderById(userId, orderId) {
 
   return buildOrderDetails(orderResult.rows, historyResult.rows);
 }
+async function findAllOrders() {
+  const result = await pool.query(
+    `SELECT
+        o.id,
+        o.order_number,
+        o.user_id,
+        u.name,
+        u.email,
+        o.service_type,
+        o.status,
+        o.total,
+        o.created_at,
+        o.updated_at,
+        COUNT(oi.id) AS item_count
+     FROM orders o
+     JOIN users u
+       ON u.id = o.user_id
+     LEFT JOIN order_items oi
+       ON oi.order_id = o.id
+     GROUP BY
+       o.id,
+       u.name,
+       u.email
+     ORDER BY o.created_at DESC`
+  );
 
+  return result.rows;
+}
+
+async function updateOrderStatus(orderId, status, adminId) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `UPDATE orders
+       SET
+         status = $2,
+         updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [orderId, status]
+    );
+
+    if (result.rows.length === 0) {
+      throw new Error("ORDER_NOT_FOUND");
+    }
+
+    await client.query(
+      `INSERT INTO order_status_history
+       (
+         order_id,
+         status,
+         changed_by
+       )
+       VALUES ($1,$2,$3)`,
+      [
+        orderId,
+        status,
+        adminId
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    return result.rows[0];
+
+  } catch (err) {
+
+    await client.query("ROLLBACK");
+    throw err;
+
+  } finally {
+
+    client.release();
+
+  }
+}
+async function findOrderByIdForAdmin(orderId) {
+
+  const orderResult = await pool.query(
+    `SELECT
+        o.id AS order_id,
+        o.order_number,
+        o.user_id,
+        u.name,
+        u.email,
+        u.campus_id,
+        o.service_type,
+        o.status,
+        o.total,
+        o.created_at,
+        o.updated_at,
+        oi.id AS item_id,
+        oi.name,
+        oi.quantity,
+        oi.unit_price,
+        oi.options,
+        oi.created_at AS item_created_at,
+        oi.updated_at AS item_updated_at
+     FROM orders o
+     JOIN users u
+       ON u.id=o.user_id
+     LEFT JOIN order_items oi
+       ON oi.order_id=o.id
+     WHERE o.id=$1
+     ORDER BY oi.created_at`,
+    [orderId]
+  );
+
+  if(orderResult.rows.length===0){
+      return null;
+  }
+
+  const historyResult = await pool.query(
+    `SELECT
+        id AS history_id,
+        order_id,
+        status,
+        changed_by,
+        changed_at,
+        created_at AS history_created_at,
+        updated_at AS history_updated_at
+     FROM order_status_history
+     WHERE order_id=$1
+     ORDER BY changed_at`,
+    [orderId]
+  );
+
+  return buildOrderDetails(orderResult.rows,historyResult.rows);
+
+}
 module.exports = {
   createOrderFromCart,
   findOrdersByUserId,
   findOrderById,
+  findAllOrders,
+  updateOrderStatus,
+  findOrderByIdForAdmin,
 };

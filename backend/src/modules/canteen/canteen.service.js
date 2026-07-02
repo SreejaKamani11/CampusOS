@@ -22,10 +22,37 @@ async function getMenuItemById(id) {
 async function getMenuItemsByCategoryId(categoryId) {
   return canteenRepository.findMenuItemsByCategoryId(categoryId);
 }
-
+async function createMenuItem(item) {
+  return canteenRepository.createMenuItem(item);
+}
+async function updateMenuItem(id, item) {
+  return canteenRepository.updateMenuItem(id, item);
+}
+async function deleteMenuItem(id) {
+  return canteenRepository.deleteMenuItem(id);
+}
+async function updateMenuAvailability(id, available) {
+  return canteenRepository.updateMenuAvailability(id, available);
+}
+async function createCategory(category) {
+    return canteenRepository.createCategory(category);
+}
+async function updateCategory(id, category) {
+  return canteenRepository.updateCategory(id, category);
+}
+async function deleteCategory(id) {
+  return canteenRepository.deleteCategory(id);
+}
 module.exports = {
   getAllCategories,
   getAllMenuItems,
   getMenuItemById,
   getMenuItemsByCategoryId,
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+  updateMenuAvailability,
+  createCategory,
+  updateCategory,
+  deleteCategory
 };

@@ -1,0 +1,175 @@
+const express = require("express");
+
+const authenticate = require("../../middleware/auth");
+const roleGuard = require("../../middleware/roleGuard");
+
+const adminController = require("./admin.controller");
+
+const router = express.Router();
+
+// Dashboard Statistics
+router.get(
+    "/dashboard",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getDashboard
+);
+router.get(
+    "/users",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getUsers
+);
+router.get(
+    "/stationery",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getStationeryProducts
+);
+router.patch(
+    "/users/:id/status",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateUserStatus
+);
+router.patch(
+    "/users/:id/role",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateUserRole
+);
+router.post(
+    "/stationery",
+    authenticate,
+    roleGuard("admin"),
+    adminController.createStationeryProduct
+);
+router.put(
+    "/stationery/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateStationeryProduct
+);
+router.delete(
+    "/stationery/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.deleteStationeryProduct
+);
+router.patch(
+    "/stationery/:id/stock",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateStationeryStock
+);
+router.get(
+    "/stationery/categories",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getStationeryCategories
+);
+router.post(
+    "/stationery/categories",
+    authenticate,
+    roleGuard("admin"),
+    adminController.createStationeryCategory
+);
+router.put(
+    "/stationery/categories/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateStationeryCategory
+);
+router.delete(
+    "/stationery/categories/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.deleteStationeryCategory
+);
+router.get(
+    "/canteen/menu",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getCanteenMenu
+);
+router.post(
+    "/canteen/menu",
+    authenticate,
+    roleGuard("admin"),
+    adminController.createCanteenMenuItem
+);
+router.put(
+    "/canteen/menu/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateCanteenMenuItem
+);
+router.delete(
+    "/canteen/menu/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.deleteCanteenMenuItem
+);
+router.patch(
+    "/canteen/menu/:id/availability",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateCanteenMenuAvailability
+);
+router.get(
+    "/canteen/categories",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getCanteenCategories
+);
+router.post(
+    "/canteen/categories",
+    authenticate,
+    roleGuard("admin"),
+    adminController.createCanteenCategory
+);
+router.put(
+    "/canteen/categories/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateCanteenCategory
+);
+router.delete(
+    "/canteen/categories/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.deleteCanteenCategory
+);
+router.get(
+    "/printjobs",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getAllPrintJobs
+);
+
+router.patch(
+    "/printjobs/:id/status",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updatePrintJobStatus
+);
+router.get(
+    "/orders",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getAllOrders
+);
+
+router.patch(
+    "/orders/:id/status",
+    authenticate,
+    roleGuard("admin"),
+    adminController.updateOrderStatus
+);
+router.get(
+    "/orders/:id",
+    authenticate,
+    roleGuard("admin"),
+    adminController.getOrderDetails
+);
+module.exports = router;
