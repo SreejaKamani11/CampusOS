@@ -12,8 +12,6 @@ const handleAddToCart = async (productId) => {
   try {
     const response = await addToCart(productId, 1)
 
-    console.log(response)
-
     toast.success("Added to Cart")
   } catch (error) {
     console.error(error.response?.data || error.message)

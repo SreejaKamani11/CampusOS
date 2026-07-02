@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { login as authLogin } from '../../services/auth.service'
 import { useAuth } from '../../context/AuthContext'
+import { toast } from "react-toastify";
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -20,9 +21,9 @@ if (response.data.user.role === "admin") {
 } else {
   navigate("/dashboard")
 }
-      console.log('Login Successful')
+
     } catch (error) {
-      console.error(error.response?.data || error.message)
+      toast.error(error.response?.data || error.message)
     }
   }
 

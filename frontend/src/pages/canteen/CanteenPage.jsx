@@ -27,12 +27,8 @@ function CanteenPage() {
     try {
       const response = await addToCart(menuItemId)
 
-      console.log(response)
-
       toast.success('Food added to cart')
     } catch (error) {
-      console.error(error.response?.data || error.message)
-
       toast.error('Failed to add food')
     }
   }
