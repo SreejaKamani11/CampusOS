@@ -28,9 +28,26 @@ async function getOrderById(userId, orderId) {
 
   return order;
 }
+async function getAllOrders() {
+    return ordersRepository.findAllOrders();
+}
 
+async function updateOrderStatus(orderId, status, adminId) {
+    return ordersRepository.updateOrderStatus(
+        orderId,
+        status,
+        adminId
+    );
+}
+async function getOrderByIdForAdmin(orderId){
+
+    return ordersRepository.findOrderByIdForAdmin(orderId);
+
+}
 module.exports = {
   createOrder,
   getOrders,
   getOrderById,
+  getAllOrders,
+  updateOrderStatus,getOrderByIdForAdmin
 };

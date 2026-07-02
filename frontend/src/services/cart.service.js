@@ -5,10 +5,15 @@ export async function getCart() {
   return response.data
 }
 
-export async function addToCart(productId, quantity) {
+export async function addToCart(
+  referenceId,
+  quantity = 1,
+  serviceType = 'stationery'
+) {
   const response = await api.post('/cart/items', {
-    productId,
+    referenceId,
     quantity,
+    serviceType,
   })
 
   return response.data

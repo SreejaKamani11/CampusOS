@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getMenu, addToCart } from '../../services/canteen.service'
+import { toast } from "react-toastify";
+import Loading from "../../components/Loading";
+import EmptyState from "../../components/EmptyState";
 
 function CanteenPage() {
   const [menuItems, setMenuItems] = useState([])
@@ -26,22 +29,20 @@ function CanteenPage() {
 
       console.log(response)
 
-      alert('Food added to cart')
+      toast.success('Food added to cart')
     } catch (error) {
       console.error(error.response?.data || error.message)
 
-      alert('Failed to add food')
+      toast.error('Failed to add food')
     }
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    )
-  }
-
+  return <Loading />;
+}
+if (menuItems.length === 0) {
+  return <EmptyState title="No Menu Items Available" />;
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-100 p-8">
       <div className="mx-auto max-w-7xl">
